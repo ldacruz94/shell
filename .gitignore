@@ -1,0 +1,8 @@
+/target
+/build
+
+# misc
+ROADMAP.md
+BOOK.md
+
+.vscode
