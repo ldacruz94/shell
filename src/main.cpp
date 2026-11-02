@@ -27,12 +27,8 @@ int main() {
         const std::string& command = words[0];
         const std::span<const std::string> args = std::span(words).subspan(1);
         
-        if (command == "exit") {
-            shell::builtin_exit(args);
-        } else if (command == "echo") {
-            shell::builtin_echo(args);
-        } else if (command == "type") {
-            shell::builtin_type(args);
+        if (const auto builtin = shell::builtin_from_name(command)) {
+            shell::run_builtin(*builtin, args);
         } else if (const auto path = shell::resolve_command(command)) {
             shell::run_external(*path, words);
         } else {

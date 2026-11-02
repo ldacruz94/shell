@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
+#include <utility>
 
 #include "executor.hpp"
 #include "parser.hpp"
@@ -12,11 +13,18 @@
 namespace shell {
 
 namespace {
-    constexpr std::array<std::string_view, 3> kBuiltins = {"echo", "exit", "type"};
-}
 
-bool is_builtin(std::string_view name) {
-    return std::ranges::find(kBuiltins, name) != kBuiltins.end();
+struct BuiltinEntry {
+    std::string_view name;
+    Builtin builtin;
+};
+
+constexpr std::array kBuiltins = {
+    BuiltinEntry{"echo", Builtin::Echo},
+    BuiltinEntry{"exit", Builtin::Exit},
+    BuiltinEntry{"type", Builtin::Type},
+};
+
 }
 
 int builtin_echo(std::span<const std::string> args) {
@@ -54,7 +62,7 @@ int builtin_type(std::span<const std::string> args) {
     int status = 0;
 
     for (const std::string& name : args) {
-        if (is_builtin(name)) {
+        if (builtin_from_name(name)) {
             std::cout << name << " is a shell builtin\n";
         } else if (const auto path = find_in_path(name)) {
             std::cout << name << " is " << path->string() << '\n';
@@ -65,6 +73,28 @@ int builtin_type(std::span<const std::string> args) {
     }
 
     return status;
+}
+
+std::optional<Builtin> builtin_from_name(std::string_view name) {
+    const auto it = std::ranges::find(kBuiltins, name, &BuiltinEntry::name);
+    
+    if (it == kBuiltins.end()) {
+        return std::nullopt;
+    }
+
+    return it->builtin;
+}
+
+int run_builtin(Builtin builtin, std::span<const std::string> args) {
+    switch (builtin) {
+        case Builtin::Echo:
+            return builtin_echo(args);
+        case Builtin::Exit:
+            return builtin_exit(args);
+        case Builtin::Type:
+            return builtin_type(args);
+    }
+    std::unreachable();
 }
 
 }

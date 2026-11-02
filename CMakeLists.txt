@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(shell LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -12,7 +12,7 @@ add_executable(shell
   src/builtins.cpp
   src/executor.cpp
 )
-target_compile_options(shell PRIVATE -Wall -Wextra -Wpedantic -Wshadow -Wconversion)
+target_compile_options(shell PRIVATE -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Werror=switch)
 
 option(SANITIZE "Build with AddressSanitizer and UBSan" ON)
 
