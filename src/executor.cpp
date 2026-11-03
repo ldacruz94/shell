@@ -1,4 +1,5 @@
 #include "executor.hpp"
+#include "error.hpp"
 
 #include <cerrno>
 #include <cstdio>
@@ -14,11 +15,6 @@
 namespace fs = std::filesystem;
 
 namespace shell {
-
-namespace {
-    constexpr int kNotFound = 127;
-    constexpr int kCannotRun = 126;
-}
 
 std::optional<fs::path> find_in_path(std::string_view name) {
     const char* path_env = std::getenv("PATH");
@@ -67,21 +63,19 @@ int run_external(const fs::path& path, const std::vector<std::string>& words) {
 
     const pid_t pid = fork();
     if (pid == -1) {
-        std::perror("fork");
-        return 1;
+        throw_errno("fork");
     }
 
     if (pid == 0) {
         execv(path.c_str(), argv.data());
         const int err = errno;
         std::cerr << words[0] << ": " << std::strerror(err) << '\n';
-        _exit(err == ENOENT ? kNotFound : kCannotRun);
+        _exit(err == ENOENT ? kStatusNotFound : kStatusCannotRun);
     }
 
     int status = 0;
     if (waitpid(pid, &status, 0) == -1) {
-        std::perror("waitpid");
-        return 1;
+        throw_errno("waitpid");
     }
 
     if (WIFEXITED(status)) {
