@@ -12,6 +12,7 @@ add_executable(shell
   src/builtins.cpp
   src/executor.cpp
   src/error.cpp
+  src/shell.cpp
 )
 target_compile_options(shell PRIVATE -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Werror=switch)
 

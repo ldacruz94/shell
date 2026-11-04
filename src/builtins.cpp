@@ -9,6 +9,7 @@
 
 #include "executor.hpp"
 #include "parser.hpp"
+#include "shell.hpp"
 
 namespace shell {
 
@@ -39,13 +40,13 @@ int builtin_echo(std::span<const std::string> args) {
     return 0;
 }
 
-int builtin_exit(std::span<const std::string> args) {
+int builtin_exit(const Shell& sh, std::span<const std::string> args) {
     if (args.size() > 1) {
         std::cerr << "exit: too many arguments\n";
         return 1;
     }
 
-    int code = 0;
+    int code = sh.last_status();
     if (!args.empty()) {
         if (const std::optional<int> parsed = parse_int(args[0])) {
             code = *parsed;
@@ -85,12 +86,12 @@ std::optional<Builtin> builtin_from_name(std::string_view name) {
     return it->builtin;
 }
 
-int run_builtin(Builtin builtin, std::span<const std::string> args) {
+int run_builtin(Shell& sh, Builtin builtin, std::span<const std::string> args) {
     switch (builtin) {
         case Builtin::Echo:
             return builtin_echo(args);
         case Builtin::Exit:
-            return builtin_exit(args);
+            return builtin_exit(sh, args);
         case Builtin::Type:
             return builtin_type(args);
     }

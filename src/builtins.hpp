@@ -7,6 +7,8 @@
 
 namespace shell {
 
+class Shell;
+
 enum class Builtin {
     Echo,
     Exit,
@@ -14,6 +16,6 @@ enum class Builtin {
 };
 
 std::optional<Builtin> builtin_from_name(std::string_view name);
-int run_builtin(Builtin builtin, std::span<const std::string> args);
+int run_builtin(Shell& sh, Builtin builtin, std::span<const std::string> args);
 
 }
